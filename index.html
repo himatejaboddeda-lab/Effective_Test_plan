@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Test Architect</title>
+<style>
+  /* ── Tokens ────────────────────────────────────────────────── */
+  :root {
+    --ink:       #0f0f0f;
+    --ink-2:     #3d3d3d;
+    --ink-3:     #6b6b6b;
+    --ink-4:     #9b9b9b;
+    --surface:   #ffffff;
+    --surface-2: #f7f7f5;
+    --surface-3: #f0f0ec;
+    --border:    #e2e2dc;
+    --border-2:  #c8c8c0;
+
+    --critical: #c0392b;
+    --high:     #d4621a;
+    --medium:   #b07d12;
+    --low:      #2e7d52;
+    --info:     #1a5fa8;
+
+    --critical-bg: #fdf2f1;
+    --high-bg:    #fdf4ed;
+    --medium-bg:  #fdf8ed;
+    --low-bg:     #f0faf4;
+    --info-bg:    #eef4fd;
+
+    --accent:    #1a1a1a;
+    --radius:    6px;
+    --radius-lg: 10px;
+    --mono:      'SF Mono', 'Fira Code', 'Fira Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--ink);
+    background: var(--surface-2);
+    min-height: 100vh;
+  }
+
+  /* ── Layout ───────────────────────────────────────────────── */
+  .shell {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    min-height: 100vh;
+  }
+
+  /* ── Sidebar ──────────────────────────────────────────────── */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .sidebar-head {
+    padding: 24px 24px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .wordmark {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+
+  .wordmark-icon {
+    width: 28px;
+    height: 28px;
+    background: var(--ink);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .wordmark-icon svg { width: 16px; height: 16px; }
+
+  .wordmark-text {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    color: var(--ink);
+  }
+
+  .wordmark-sub {
+    font-size: 11px;
+    color: var(--ink-4);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  /* ── Input form ───────────────────────────────────────────── */
+  .input-section {
+    padding: 20px 24px;
+    flex: 1;
+  }
+
+  .field {
+    margin-bottom: 14px;
+  }
+
+  .field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 6px;
+  }
+
+  .field input {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px;
+    color: var(--ink);
+    background: var(--surface);
+    outline: none;
+    transition: border-color 0.15s;
+    font-family: inherit;
+  }
+
+  .field input:focus {
+    border-color: var(--ink);
+  }
+
+  .field input::placeholder { color: var(--ink-4); }
+
+  .field-hint {
+    font-size: 11px;
+    color: var(--ink-4);
+    margin-top: 4px;
+  }
+
+  .divider-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 18px 0 14px;
+    font-size: 11px;
+    color: var(--ink-4);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .divider-label::before,
+  .divider-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .btn-analyze {
+    width: 100%;
+    padding: 11px;
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    letter-spacing: -0.1px;
+    transition: opacity 0.15s;
+    margin-top: 4px;
+  }
+  .btn-analyze:hover { opacity: 0.85; }
+  .btn-analyze:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ── Progress ─────────────────────────────────────────────── */
+  .progress-section {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    display: none;
+  }
+  .progress-section.visible { display: block; }
+
+  .progress-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-3);
+    margin-bottom: 10px;
+  }
+
+  .stage-list { list-style: none; }
+
+  .stage-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 0;
+    font-size: 12px;
+    color: var(--ink-4);
+    transition: color 0.2s;
+  }
+
+  .stage-item.active { color: var(--ink); }
+  .stage-item.done { color: var(--low); }
+  .stage-item.error { color: var(--critical); }
+
+  .stage-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--border-2);
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+
+  .stage-item.active .stage-dot { background: var(--ink); animation: pulse 1s infinite; }
+  .stage-item.done .stage-dot { background: var(--low); }
+  .stage-item.error .stage-dot { background: var(--critical); }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* ── Recent plans ─────────────────────────────────────────── */
+  .recent-section {
+    padding: 16px 24px 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  .recent-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-4);
+    margin-bottom: 10px;
+  }
+
+  .recent-item {
+    padding: 8px 10px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    margin-bottom: 4px;
+    transition: background 0.1s;
+    border: 1px solid transparent;
+  }
+  .recent-item:hover { background: var(--surface-2); border-color: var(--border); }
+
+  .recent-item-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .recent-item-meta {
+    font-size: 11px;
+    color: var(--ink-4);
+    margin-top: 1px;
+  }
+
+  /* ── Main panel ───────────────────────────────────────────── */
+  .main {
+    overflow-y: auto;
+    padding: 32px 40px;
+  }
+
+  /* ── Empty state ──────────────────────────────────────────── */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    text-align: center;
+    color: var(--ink-4);
+  }
+
+  .empty-icon {
+    width: 48px;
+    height: 48px;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+  }
+
+  .empty-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ink-2);
+    margin-bottom: 6px;
+  }
+
+  .empty-desc {
+    font-size: 13px;
+    color: var(--ink-4);
+    max-width: 300px;
+    line-height: 1.7;
+  }
+
+  /* ── Plan header ──────────────────────────────────────────── */
+  .plan-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .plan-app {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .plan-meta {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    border: 1px solid;
+  }
+
+  .tag-domain { background: var(--info-bg); color: var(--info); border-color: #b3cef5; }
+  .tag-new    { background: var(--medium-bg); color: var(--medium); border-color: #e8d5a0; }
+  .tag-exists { background: var(--low-bg); color: var(--low); border-color: #a8d9b8; }
+  .tag-plan   { background: var(--surface-3); color: var(--ink-3); border-color: var(--border); font-family: var(--mono); font-size: 10px; }
+
+  /* ── Confidence score ─────────────────────────────────────── */
+  .confidence-ring {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+
+  .confidence-num {
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+
+  .confidence-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-4);
+  }
+
+  /* ── Release readiness ────────────────────────────────────── */
+  .readiness-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 18px 20px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .readiness-score-wrap {
+    flex-shrink: 0;
+    text-align: center;
+  }
+
+  .readiness-score {
+    font-size: 36px;
+    font-weight: 600;
+    letter-spacing: -1.5px;
+    line-height: 1;
+  }
+
+  .readiness-score-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-4);
+    margin-top: 2px;
+  }
+
+  .readiness-info { flex: 1; }
+
+  .readiness-rec {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+
+  .readiness-reason {
+    font-size: 12px;
+    color: var(--ink-3);
+    line-height: 1.5;
+  }
+
+  .readiness-blocks {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .readiness-block-item {
+    font-size: 11px;
+    color: var(--critical);
+    display: flex;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .rec-release    { color: var(--low); }
+  .rec-hold       { color: var(--critical); }
+  .rec-conditional { color: var(--medium); }
+
+  /* ── Section ──────────────────────────────────────────────── */
+  .section {
+    margin-bottom: 24px;
+  }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-4);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .section-title-count {
+    font-size: 10px;
+    background: var(--surface-3);
+    color: var(--ink-3);
+    border-radius: 10px;
+    padding: 1px 6px;
+  }
+
+  /* ── Change summary ───────────────────────────────────────── */
+  .summary-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px 18px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--ink-2);
+  }
+
+  /* ── Facts / Gaps grid ────────────────────────────────────── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .list-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .list-card-head {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-3);
+    background: var(--surface-2);
+  }
+
+  .list-card-body { padding: 8px 6px; }
+
+  .list-item {
+    padding: 7px 8px;
+    font-size: 12px;
+    color: var(--ink-2);
+    border-radius: var(--radius);
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .list-item:hover { background: var(--surface-2); }
+
+  .list-bullet {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--border-2);
+    flex-shrink: 0;
+    margin-top: 6px;
+  }
+
+  /* ── Gap items ────────────────────────────────────────────── */
+  .gap-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .gap-severity {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 2px 7px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .gap-critical { background: var(--critical-bg); color: var(--critical); }
+  .gap-high     { background: var(--high-bg); color: var(--high); }
+  .gap-medium   { background: var(--medium-bg); color: var(--medium); }
+  .gap-low      { background: var(--low-bg); color: var(--low); }
+
+  .gap-text { flex: 1; }
+  .gap-name { font-size: 12px; font-weight: 500; color: var(--ink); margin-bottom: 2px; }
+  .gap-reason { font-size: 11px; color: var(--ink-4); }
+
+  /* ── Blast radius ─────────────────────────────────────────── */
+  .blast-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .blast-col {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+
+  .blast-col-head {
+    padding: 8px 12px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .blast-direct   .blast-col-head { background: var(--critical-bg); color: var(--critical); }
+  .blast-indirect .blast-col-head { background: var(--high-bg); color: var(--high); }
+  .blast-downstream .blast-col-head { background: var(--medium-bg); color: var(--medium); }
+
+  .blast-col-body { padding: 8px; }
+
+  .blast-module {
+    font-size: 12px;
+    padding: 5px 6px;
+    border-radius: var(--radius);
+    color: var(--ink-2);
+  }
+  .blast-module:hover { background: var(--surface-2); }
+
+  /* ── Scenarios ────────────────────────────────────────────── */
+  .scenario-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-bottom: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .scenario-card:hover { border-color: var(--border-2); }
+  .scenario-card.open { border-color: var(--ink); }
+
+  .scenario-head {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .scenario-id {
+    font-size: 10px;
+    font-weight: 600;
+    font-family: var(--mono);
+    color: var(--ink-4);
+    flex-shrink: 0;
+  }
+
+  .scenario-title-wrap { flex: 1; }
+
+  .scenario-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .scenario-modules {
+    font-size: 11px;
+    color: var(--ink-4);
+    margin-top: 2px;
+  }
+
+  .scenario-risk {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    flex-shrink: 0;
+  }
+
+  .risk-critical { background: var(--critical-bg); color: var(--critical); }
+  .risk-high     { background: var(--high-bg); color: var(--high); }
+  .risk-medium   { background: var(--medium-bg); color: var(--medium); }
+  .risk-low      { background: var(--low-bg); color: var(--low); }
+
+  .scenario-chevron {
+    color: var(--ink-4);
+    font-size: 12px;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+  }
+  .scenario-card.open .scenario-chevron { transform: rotate(180deg); }
+
+  .scenario-body {
+    display: none;
+    border-top: 1px solid var(--border);
+    padding: 16px;
+    background: var(--surface-2);
+  }
+  .scenario-card.open .scenario-body { display: block; }
+
+  .scenario-section-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-4);
+    margin-bottom: 5px;
+    margin-top: 12px;
+  }
+  .scenario-section-label:first-child { margin-top: 0; }
+
+  .scenario-why {
+    font-size: 12px;
+    color: var(--ink-2);
+    line-height: 1.6;
+    padding: 8px 10px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+  }
+
+  .step-list { list-style: none; }
+  .step-item {
+    display: flex;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--ink-2);
+    padding: 4px 0;
+    line-height: 1.5;
+  }
+  .step-num {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--surface-3);
+    color: var(--ink-3);
+    font-size: 10px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .expected-result {
+    font-size: 12px;
+    color: var(--low);
+    background: var(--low-bg);
+    border: 1px solid #b8dfc8;
+    border-radius: var(--radius);
+    padding: 8px 10px;
+    line-height: 1.5;
+  }
+
+  .dev-feedback {
+    font-size: 12px;
+    color: var(--ink-2);
+    background: var(--info-bg);
+    border: 1px solid #b3cef5;
+    border-radius: var(--radius);
+    padding: 8px 10px;
+    line-height: 1.5;
+  }
+
+  /* ── Not required ─────────────────────────────────────────── */
+  .not-required-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+
+  .not-required-module {
+    font-weight: 500;
+    color: var(--ink);
+    min-width: 120px;
+  }
+
+  .not-required-reason { color: var(--ink-4); }
+
+  /* ── Developer feedback ───────────────────────────────────── */
+  .dev-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    background: var(--surface);
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .dev-type {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 2px 6px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .dev-missing     { background: var(--critical-bg); color: var(--critical); }
+  .dev-design      { background: var(--info-bg); color: var(--info); }
+  .dev-ux          { background: var(--medium-bg); color: var(--medium); }
+  .dev-security    { background: #f9f0ff; color: #6b35a8; }
+  .dev-performance { background: var(--high-bg); color: var(--high); }
+
+  .dev-suggestion { font-size: 12px; color: var(--ink-2); flex: 1; line-height: 1.5; }
+  .dev-module { font-size: 11px; color: var(--ink-4); margin-top: 2px; }
+
+  /* ── Neo4j proposal ───────────────────────────────────────── */
+  .proposal-box {
+    background: var(--surface);
+    border: 1.5px solid #b3cef5;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+
+  .proposal-head {
+    background: var(--info-bg);
+    padding: 12px 16px;
+    border-bottom: 1px solid #b3cef5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .proposal-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--info);
+  }
+
+  .proposal-meta { font-size: 11px; color: var(--info); opacity: 0.7; }
+
+  .proposal-modules {
+    padding: 12px 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .module-chip {
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 4px;
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    color: var(--ink-2);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .module-chip-risk {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .chip-critical { background: var(--critical); }
+  .chip-high     { background: var(--high); }
+  .chip-medium   { background: var(--medium); }
+  .chip-low      { background: var(--low); }
+
+  .proposal-actions {
+    padding: 12px 16px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .btn-approve {
+    padding: 8px 16px;
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .btn-approve:hover { opacity: 0.85; }
+
+  .btn-reject {
+    padding: 8px 16px;
+    background: transparent;
+    color: var(--critical);
+    border: 1px solid #e8b4b0;
+    border-radius: var(--radius);
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-reject:hover { background: var(--critical-bg); }
+
+  .proposal-status {
+    font-size: 12px;
+    color: var(--ink-4);
+    margin-left: auto;
+  }
+
+  /* ── Error state ──────────────────────────────────────────── */
+  .error-box {
+    background: var(--critical-bg);
+    border: 1px solid #e8b4b0;
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    font-size: 13px;
+    color: var(--critical);
+  }
+
+  /* ── Business risks ───────────────────────────────────────── */
+  .risk-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--high);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+  .risk-name { font-weight: 500; color: var(--ink); margin-bottom: 2px; }
+  .risk-impact { color: var(--ink-3); }
+
+  /* ── Responsive ───────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .shell { grid-template-columns: 1fr; }
+    .sidebar { position: static; height: auto; }
+    .main { padding: 20px; }
+    .two-col, .blast-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ── Sidebar ─────────────────────────────────────────── -->
+  <aside class="sidebar">
+
+    <div class="sidebar-head">
+      <div class="wordmark">
+        <div class="wordmark-icon">
+          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 4h10M3 8h6M3 12h8" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="13" cy="11" r="2.5" stroke="white" stroke-width="1.2"/>
+            <path d="M15 13l1.5 1.5" stroke="white" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <div class="wordmark-text">Test Architect</div>
+          <div class="wordmark-sub">AI-powered · Effective plans</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-section">
+      <div class="field">
+        <label>Public URL</label>
+        <input type="url" id="inputUrl" placeholder="https://cinemark.com" />
+        <div class="field-hint">Crawls pages, navigation, and forms</div>
+      </div>
+
+      <div class="divider-label">and / or</div>
+
+      <div class="field">
+        <label>Jira Ticket Key</label>
+        <input type="text" id="inputJira" placeholder="PROJ-123" />
+        <div class="field-hint">Reads requirements and affected modules</div>
+      </div>
+
+      <div class="field">
+        <label>GitHub Repo or PR</label>
+        <input type="url" id="inputGithub" placeholder="https://github.com/owner/repo" />
+        <div class="field-hint">Extracts file structure and diff</div>
+      </div>
+
+      <div class="field">
+        <label>Application Name <span style="color:var(--ink-4);font-weight:400;text-transform:none;letter-spacing:0">(optional override)</span></label>
+        <input type="text" id="inputAppName" placeholder="Cinemark" />
+      </div>
+
+      <button class="btn-analyze" id="btnAnalyze" onclick="startAnalysis()">
+        Analyze and generate test plan
+      </button>
+    </div>
+
+    <div class="progress-section" id="progressSection">
+      <div class="progress-label">Pipeline progress</div>
+      <ul class="stage-list" id="stageList">
+        <li class="stage-item" data-stage="1"><span class="stage-dot"></span>Fetching inputs</li>
+        <li class="stage-item" data-stage="2"><span class="stage-dot"></span>Detecting application</li>
+        <li class="stage-item" data-stage="3"><span class="stage-dot"></span>Querying Neo4j</li>
+        <li class="stage-item" data-stage="4"><span class="stage-dot"></span>Classifying domain</li>
+        <li class="stage-item" data-stage="5"><span class="stage-dot"></span>Blast radius analysis</li>
+        <li class="stage-item" data-stage="6"><span class="stage-dot"></span>Generating test plan</li>
+        <li class="stage-item" data-stage="7"><span class="stage-dot"></span>Building Neo4j proposal</li>
+        <li class="stage-item" data-stage="8"><span class="stage-dot"></span>Complete</li>
+      </ul>
+    </div>
+
+    <div class="recent-section" id="recentSection" style="display:none">
+      <div class="recent-label">Recent plans</div>
+      <div id="recentList"></div>
+    </div>
+
+  </aside>
+
+  <!-- ── Main panel ───────────────────────────────────────── -->
+  <main class="main" id="mainPanel">
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <rect x="3" y="3" width="16" height="16" rx="3" stroke="#c8c8c0" stroke-width="1.3"/>
+          <path d="M7 8h8M7 11h5M7 14h6" stroke="#c8c8c0" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="empty-title">No plan yet</div>
+      <div class="empty-desc">Paste a URL, Jira ticket, or GitHub repo to generate a grounded test plan.</div>
+    </div>
+    <div id="planContent" style="display:none"></div>
+  </main>
+
+</div>
+
+<script>
+const WORKER = 'https://effective-test-plan.boddedahimateja.workers.dev';
+let pollTimer = null;
+let recentPlans = JSON.parse(localStorage.getItem('recentPlans') || '[]');
+
+// ── Render recent plans in sidebar ────────────────────────────
+function renderRecent() {
+  if (!recentPlans.length) return;
+  document.getElementById('recentSection').style.display = 'block';
+  const list = document.getElementById('recentList');
+  list.innerHTML = recentPlans.slice(0, 5).map(p => `
+    <div class="recent-item" onclick="loadPlan('${p.planId}')">
+      <div class="recent-item-name">${p.appName || p.planId}</div>
+      <div class="recent-item-meta">${p.domain || ''} · ${timeAgo(p.createdAt)}</div>
+    </div>
+  `).join('');
+}
+
+function timeAgo(iso) {
+  if (!iso) return '';
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return mins + 'm ago';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + 'h ago';
+  return Math.floor(hrs / 24) + 'd ago';
+}
+
+// ── Start analysis ─────────────────────────────────────────────
+async function startAnalysis() {
+  const url = document.getElementById('inputUrl').value.trim();
+  const jiraKey = document.getElementById('inputJira').value.trim();
+  const githubUrl = document.getElementById('inputGithub').value.trim();
+  const appName = document.getElementById('inputAppName').value.trim();
+
+  if (!url && !jiraKey && !githubUrl) {
+    alert('Please provide at least one input: URL, Jira ticket, or GitHub repo.');
+    return;
+  }
+
+  setAnalyzing(true);
+  showProgress();
+
+  try {
+    const res = await fetch(`${WORKER}/analyze`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        url: url || undefined,
+        jiraKey: jiraKey || undefined,
+        githubUrl: githubUrl || undefined,
+        appName: appName || undefined,
+      }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Analysis failed');
+
+    pollStatus(data.planId);
+  } catch (err) {
+    setAnalyzing(false);
+    showError(err.message);
+  }
+}
+
+// ── Poll status ────────────────────────────────────────────────
+function pollStatus(planId) {
+  if (pollTimer) clearInterval(pollTimer);
+
+  pollTimer = setInterval(async () => {
+    try {
+      const res = await fetch(`${WORKER}/status/${planId}`);
+      const data = await res.json();
+
+      updateStageIndicators(data.stageNumber, data.status);
+
+      if (data.status === 'complete') {
+        clearInterval(pollTimer);
+        pollTimer = null;
+        setAnalyzing(false);
+
+        // Save to recent
+        const entry = {
+          planId,
+          appName: data.appName || data.plan?.changeSummary?.slice(0, 30) || planId,
+          domain: data.domain,
+          createdAt: data.createdAt || new Date().toISOString(),
+        };
+        recentPlans = [entry, ...recentPlans.filter(p => p.planId !== planId)].slice(0, 10);
+        localStorage.setItem('recentPlans', JSON.stringify(recentPlans));
+        renderRecent();
+
+        renderPlan(data);
+      } else if (data.status === 'failed') {
+        clearInterval(pollTimer);
+        pollTimer = null;
+        setAnalyzing(false);
+        showError(data.error || 'Pipeline failed');
+      }
+    } catch (err) {
+      console.error('Poll error:', err);
+    }
+  }, 2000);
+}
+
+// ── Load a previous plan ───────────────────────────────────────
+async function loadPlan(planId) {
+  try {
+    const res = await fetch(`${WORKER}/status/${planId}`);
+    const data = await res.json();
+    renderPlan(data);
+  } catch (err) {
+    showError('Could not load plan: ' + err.message);
+  }
+}
+
+// ── Update stage indicators ────────────────────────────────────
+function updateStageIndicators(stageNumber, status) {
+  const items = document.querySelectorAll('.stage-item');
+  items.forEach(item => {
+    const n = parseInt(item.dataset.stage);
+    item.classList.remove('active', 'done', 'error');
+    if (status === 'failed' && n === stageNumber) {
+      item.classList.add('error');
+    } else if (n < stageNumber) {
+      item.classList.add('done');
+    } else if (n === stageNumber) {
+      item.classList.add('active');
+    }
+  });
+}
+
+// ── Show/hide progress ─────────────────────────────────────────
+function showProgress() {
+  document.getElementById('progressSection').classList.add('visible');
+  updateStageIndicators(1, 'processing');
+}
+
+function setAnalyzing(on) {
+  const btn = document.getElementById('btnAnalyze');
+  btn.disabled = on;
+  btn.textContent = on ? 'Analyzing…' : 'Analyze and generate test plan';
+}
+
+function showError(msg) {
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('planContent').style.display = 'block';
+  document.getElementById('planContent').innerHTML =
+    `<div class="error-box">⚠ ${msg}</div>`;
+}
+
+// ── Main render function ───────────────────────────────────────
+function renderPlan(data) {
+  document.getElementById('emptyState').style.display = 'none';
+  const plan = data.plan || {};
+  const content = document.getElementById('planContent');
+  content.style.display = 'block';
+  content.innerHTML = buildPlanHTML(data, plan);
+}
+
+function buildPlanHTML(data, plan) {
+  const rr = plan.releaseReadiness || {};
+  const recClass = {
+    'Release': 'rec-release',
+    'Hold': 'rec-hold',
+    'Conditional': 'rec-conditional',
+  }[rr.recommendation] || '';
+
+  const scoreColor = rr.score >= 80 ? '#2e7d52' : rr.score >= 60 ? '#b07d12' : '#c0392b';
+
+  return `
+    <!-- Plan header -->
+    <div class="plan-header">
+      <div>
+        <div class="plan-app">${data.appName || 'Analysis'}</div>
+        <div class="plan-meta">
+          ${data.domain ? `<span class="tag tag-domain">${data.domain}</span>` : ''}
+          ${data.isNewApp ? `<span class="tag tag-new">New application</span>` : `<span class="tag tag-exists">Existing graph found</span>`}
+          <span class="tag tag-plan">${data.planId || ''}</span>
+        </div>
+      </div>
+      <div class="confidence-ring">
+        <div class="confidence-num" style="color:${plan.confidenceScore >= 70 ? '#2e7d52' : plan.confidenceScore >= 40 ? '#b07d12' : '#c0392b'}">
+          ${plan.confidenceScore || 0}%
+        </div>
+        <div class="confidence-label">Confidence</div>
+      </div>
+    </div>
+
+    <!-- Release readiness -->
+    ${rr.recommendation ? `
+    <div class="readiness-bar">
+      <div class="readiness-score-wrap">
+        <div class="readiness-score ${recClass}" style="color:${scoreColor}">${rr.score || 0}</div>
+        <div class="readiness-score-label">Release score</div>
+      </div>
+      <div class="readiness-info">
+        <div class="readiness-rec ${recClass}">
+          ${rr.recommendation === 'Release' ? '✓ Ready to release' :
+            rr.recommendation === 'Hold' ? '✗ Do not release yet' :
+            '⚠ Conditional — fix blocking items first'}
+        </div>
+        <div class="readiness-reason">${rr.reasoning || ''}</div>
+        ${(rr.blockingItems || []).length ? `
+        <div class="readiness-blocks">
+          ${rr.blockingItems.map(b => `<div class="readiness-block-item">· ${b}</div>`).join('')}
+        </div>` : ''}
+      </div>
+    </div>` : ''}
+
+    <!-- Neo4j proposal (new apps only) -->
+    ${data.neo4jProposal && data.neo4jProposal.status === 'pending_approval' ? `
+    <div class="proposal-box">
+      <div class="proposal-head">
+        <div class="proposal-title">New application detected — approve Neo4j write</div>
+        <div class="proposal-meta">${data.neo4jProposal.totalNodes || 0} nodes · ${data.neo4jProposal.totalRelationships || 0} relationships</div>
+      </div>
+      <div class="proposal-modules">
+        ${(data.neo4jProposal.modules || []).map(m => `
+          <div class="module-chip">
+            <span class="module-chip-risk chip-${(m.riskLevel || 'medium').toLowerCase()}"></span>
+            ${m.name}
+          </div>
+        `).join('')}
+      </div>
+      <div class="proposal-actions">
+        <button class="btn-approve" onclick="approvePlan('${data.planId}', true)">
+          Write to Neo4j
+        </button>
+        <button class="btn-reject" onclick="approvePlan('${data.planId}', false)">
+          Reject
+        </button>
+        <span class="proposal-status" id="proposalStatus"></span>
+      </div>
+    </div>` : ''}
+
+    <!-- Change summary -->
+    <div class="section">
+      <div class="section-title">Change summary</div>
+      <div class="summary-box">${plan.changeSummary || 'No summary generated.'}</div>
+    </div>
+
+    <!-- Facts + Gaps -->
+    <div class="two-col">
+      <div class="list-card">
+        <div class="list-card-head">Confirmed facts <span style="color:var(--low)">(${(plan.facts||[]).length})</span></div>
+        <div class="list-card-body">
+          ${(plan.facts || []).map(f => `
+            <div class="list-item">
+              <span class="list-bullet"></span>
+              ${f}
+            </div>
+          `).join('') || '<div class="list-item" style="color:var(--ink-4)">No facts extracted</div>'}
+        </div>
+      </div>
+      <div class="list-card">
+        <div class="list-card-head">Requirement gaps <span style="color:var(--critical)">(${(plan.requirementGaps||[]).length})</span></div>
+        <div class="list-card-body">
+          ${(plan.requirementGaps || []).map(g => `
+            <div class="list-item">
+              <span class="list-bullet" style="background:${g.severity==='Critical'?'var(--critical)':g.severity==='High'?'var(--high)':'var(--medium)'}"></span>
+              <span><strong style="font-size:11px;color:${g.severity==='Critical'?'var(--critical)':g.severity==='High'?'var(--high)':'var(--medium)'}">${g.severity}</strong> ${g.gap}</span>
+            </div>
+          `).join('') || '<div class="list-item" style="color:var(--low)">No gaps detected</div>'}
+        </div>
+      </div>
+    </div>
+
+    <!-- Blast radius -->
+    ${plan.blastRadius && (plan.blastRadius.direct?.length || plan.blastRadius.indirect?.length || plan.blastRadius.downstream?.length) ? `
+    <div class="section">
+      <div class="section-title">Blast radius <span class="section-title-count">Neo4j traced</span></div>
+      <div class="blast-grid">
+        <div class="blast-col blast-direct">
+          <div class="blast-col-head">Direct impact</div>
+          <div class="blast-col-body">
+            ${(plan.blastRadius.direct||[]).map(m => `<div class="blast-module">${m}</div>`).join('') || '<div class="blast-module" style="color:var(--ink-4)">None</div>'}
+          </div>
+        </div>
+        <div class="blast-col blast-indirect">
+          <div class="blast-col-head">Indirect impact</div>
+          <div class="blast-col-body">
+            ${(plan.blastRadius.indirect||[]).map(m => `<div class="blast-module">${m}</div>`).join('') || '<div class="blast-module" style="color:var(--ink-4)">None</div>'}
+          </div>
+        </div>
+        <div class="blast-col blast-downstream">
+          <div class="blast-col-head">Downstream impact</div>
+          <div class="blast-col-body">
+            ${(plan.blastRadius.downstream||[]).map(m => `<div class="blast-module">${m}</div>`).join('') || '<div class="blast-module" style="color:var(--ink-4)">None</div>'}
+          </div>
+        </div>
+      </div>
+    </div>` : ''}
+
+    <!-- Business risks -->
+    ${(plan.businessRisks||[]).length ? `
+    <div class="section">
+      <div class="section-title">Business risks <span class="section-title-count">${(plan.businessRisks||[]).length}</span></div>
+      ${plan.businessRisks.map(r => `
+        <div class="risk-item">
+          <div class="risk-name">${r.risk}</div>
+          <div class="risk-impact">${r.impact} ${r.module ? `<span style="color:var(--ink-4)">· ${r.module}</span>` : ''}</div>
+        </div>
+      `).join('')}
+    </div>` : ''}
+
+    <!-- Critical scenarios -->
+    <div class="section">
+      <div class="section-title">
+        Critical scenarios
+        <span class="section-title-count">${(plan.criticalScenarios||[]).length} of max 10</span>
+      </div>
+      ${(plan.criticalScenarios || []).map((s, i) => `
+        <div class="scenario-card" id="sc-${i}" onclick="toggleScenario(${i})">
+          <div class="scenario-head">
+            <div class="scenario-id">${s.id || ('S-' + String(i+1).padStart(2,'0'))}</div>
+            <div class="scenario-title-wrap">
+              <div class="scenario-title">${s.title}</div>
+              ${(s.impactedModules||[]).length ? `<div class="scenario-modules">${s.impactedModules.join(' · ')}</div>` : ''}
+            </div>
+            <div class="scenario-risk risk-${(s.risk||'medium').toLowerCase()}">${s.risk || 'Medium'}</div>
+            <div class="scenario-chevron">▾</div>
+          </div>
+          <div class="scenario-body">
+            ${s.whyItMatters ? `
+            <div class="scenario-section-label">Why this matters</div>
+            <div class="scenario-why">${s.whyItMatters}</div>` : ''}
+
+            ${(s.howToTest||[]).length ? `
+            <div class="scenario-section-label">How to test</div>
+            <ol class="step-list">
+              ${s.howToTest.map((step, j) => `
+                <li class="step-item">
+                  <span class="step-num">${j+1}</span>
+                  <span>${step}</span>
+                </li>
+              `).join('')}
+            </ol>` : ''}
+
+            ${s.expectedResult ? `
+            <div class="scenario-section-label">Expected result</div>
+            <div class="expected-result">${s.expectedResult}</div>` : ''}
+
+            ${s.developerFeedback ? `
+            <div class="scenario-section-label">Developer note</div>
+            <div class="dev-feedback">${s.developerFeedback}</div>` : ''}
+          </div>
+        </div>
+      `).join('') || '<div style="color:var(--ink-4);font-size:13px;padding:12px 0">No scenarios generated</div>'}
+    </div>
+
+    <!-- Tests not required -->
+    ${(plan.testsNotRequired||[]).length ? `
+    <div class="section">
+      <div class="section-title">Tests not required <span class="section-title-count">${plan.testsNotRequired.length} excluded</span></div>
+      ${plan.testsNotRequired.map(t => `
+        <div class="not-required-item">
+          <div class="not-required-module">${t.module}</div>
+          <div class="not-required-reason">${t.reason}</div>
+        </div>
+      `).join('')}
+    </div>` : ''}
+
+    <!-- Developer feedback -->
+    ${(plan.developerFeedback||[]).length ? `
+    <div class="section">
+      <div class="section-title">Developer feedback <span class="section-title-count">${plan.developerFeedback.length}</span></div>
+      ${plan.developerFeedback.map(d => `
+        <div class="dev-card">
+          <span class="dev-type dev-${(d.type||'design').toLowerCase()}">${d.type || 'Design'}</span>
+          <div>
+            <div class="dev-suggestion">${d.suggestion}</div>
+            ${d.module ? `<div class="dev-module">${d.module}</div>` : ''}
+          </div>
+        </div>
+      `).join('')}
+    </div>` : ''}
+
+    <!-- Confidence reason -->
+    ${plan.confidenceReason ? `
+    <div class="section">
+      <div class="section-title">Confidence reasoning</div>
+      <div class="summary-box" style="color:var(--ink-3);font-size:12px">${plan.confidenceReason}</div>
+    </div>` : ''}
+  `;
+}
+
+// ── Toggle scenario accordion ──────────────────────────────────
+function toggleScenario(i) {
+  const card = document.getElementById('sc-' + i);
+  card.classList.toggle('open');
+}
+
+// ── Approve/reject Neo4j write ─────────────────────────────────
+async function approvePlan(planId, approved) {
+  const statusEl = document.getElementById('proposalStatus');
+  if (statusEl) statusEl.textContent = approved ? 'Writing to Neo4j…' : 'Rejecting…';
+
+  try {
+    const res = await fetch(`${WORKER}/approve/${planId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ approved }),
+    });
+    const data = await res.json();
+
+    if (statusEl) {
+      statusEl.textContent = approved
+        ? `✓ Written — ${data.nodesCreated} nodes, ${data.relationshipsCreated} relationships`
+        : '✗ Rejected';
+      statusEl.style.color = approved ? 'var(--low)' : 'var(--critical)';
+    }
+
+    // Disable buttons
+    document.querySelectorAll('.btn-approve, .btn-reject').forEach(b => b.disabled = true);
+  } catch (err) {
+    if (statusEl) {
+      statusEl.textContent = 'Error: ' + err.message;
+      statusEl.style.color = 'var(--critical)';
+    }
+  }
+}
+
+// ── Init ───────────────────────────────────────────────────────
+renderRecent();
+</script>
+</body>
+</html>
