@@ -345,6 +345,174 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-siz
 .errbox{background:var(--critbg);border:1px solid rgba(255,71,87,0.3);border-radius:var(--rl);padding:14px;font-size:13px;color:var(--crit);}
 
 @media(max-width:800px){.shell{grid-template-columns:1fr;}.sidebar{position:static;height:auto;}.main{padding:16px;}.tc,.bg3{grid-template-columns:1fr;}}
+
+/* ── Step 2 UI additions: Domain badge, Requirement gaps, Developer improvements, Executability ── */
+.domain-badge-card {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  border: 1px solid #334155;
+  border-left: 4px solid #6366f1;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.domain-badge-emoji { font-size: 2rem; line-height: 1; flex-shrink: 0; margin-top: 2px; }
+.domain-badge-body { flex: 1; min-width: 0; }
+.domain-badge-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin: 0 0 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.domain-confidence-pill {
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: #4f46e5;
+  color: #fff;
+  border-radius: 20px;
+  padding: 2px 10px;
+  letter-spacing: 0.02em;
+}
+.domain-confidence-pill.medium { background: #d97706; }
+.domain-confidence-pill.low { background: #64748b; }
+.domain-signals-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.domain-signal-chip {
+  font-size: 0.7rem;
+  background: #1e3a5f;
+  color: #93c5fd;
+  border: 1px solid #1d4ed8;
+  border-radius: 4px;
+  padding: 2px 7px;
+}
+.domain-standards-row { margin-top: 8px; font-size: 0.75rem; color: #94a3b8; line-height: 1.5; }
+.domain-standards-row strong { color: #a5b4fc; }
+
+.req-gaps-card {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-left: 4px solid #f59e0b;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 18px;
+}
+.req-gaps-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.req-gaps-title { font-size: 0.95rem; font-weight: 700; color: #fbbf24; margin: 0; }
+.req-gaps-count {
+  font-size: 0.72rem;
+  background: #78350f;
+  color: #fde68a;
+  border-radius: 20px;
+  padding: 2px 9px;
+  font-weight: 600;
+}
+.req-gap-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid #1e293b;
+}
+.req-gap-item:last-child { border-bottom: none; }
+.req-gap-id {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+  flex-shrink: 0;
+  min-width: 54px;
+  margin-top: 1px;
+}
+.req-gap-body { flex: 1; min-width: 0; }
+.req-gap-text { font-size: 0.82rem; color: #e2e8f0; margin: 0 0 3px 0; line-height: 1.45; }
+.req-gap-question { font-size: 0.77rem; color: #fcd34d; margin: 0; line-height: 1.4; }
+.req-gap-question::before { content: "❓ "; }
+.severity-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: 4px;
+  padding: 2px 6px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.severity-HIGH, .severity-Critical, .severity-CRITICAL, .severity-High { background: #7f1d1d; color: #fca5a5; }
+.severity-MEDIUM, .severity-Medium { background: #78350f; color: #fcd34d; }
+.severity-LOW, .severity-Low { background: #1e3a2f; color: #6ee7b7; }
+
+.dev-improvements-card {
+  background: #0f172a;
+  border: 1px solid #334155;
+  border-left: 4px solid #10b981;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 18px;
+}
+.dev-improvements-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.dev-improvements-title { font-size: 0.95rem; font-weight: 700; color: #34d399; margin: 0; }
+.dev-improvements-count {
+  font-size: 0.72rem;
+  background: #064e3b;
+  color: #6ee7b7;
+  border-radius: 20px;
+  padding: 2px 9px;
+  font-weight: 600;
+}
+.dev-improvement-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid #1e293b;
+}
+.dev-improvement-item:last-child { border-bottom: none; }
+.dev-improvement-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+.dev-improvement-body { flex: 1; min-width: 0; }
+.dev-improvement-suggestion { font-size: 0.82rem; font-weight: 600; color: #e2e8f0; margin: 0 0 3px 0; line-height: 1.4; }
+.dev-improvement-reason { font-size: 0.77rem; color: #94a3b8; margin: 0; line-height: 1.4; }
+.priority-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: 4px;
+  padding: 2px 6px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.priority-HIGH, .priority-High { background: #7f1d1d; color: #fca5a5; }
+.priority-MEDIUM, .priority-Medium { background: #78350f; color: #fcd34d; }
+.priority-LOW, .priority-Low { background: #1e3a5f; color: #93c5fd; }
+
+.executability-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  border-radius: 4px;
+  padding: 2px 8px;
+  margin-left: 8px;
+  vertical-align: middle;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+.exec-Executable { background: #052e16; color: #4ade80; border: 1px solid #166534; }
+.exec-Blocked { background: #450a0a; color: #f87171; border: 1px solid #7f1d1d; }
+.exec-Suggested { background: #1c1917; color: #a78bfa; border: 1px solid #4c1d95; }
+.blocked-reason-text {
+  display: block;
+  font-size: 0.72rem;
+  color: #fca5a5;
+  margin-top: 4px;
+  padding: 4px 8px;
+  background: #1c0202;
+  border-left: 2px solid #ef4444;
+  border-radius: 0 4px 4px 0;
+  line-height: 1.4;
+}
+
 </style>
 </head>
 <body>
@@ -598,6 +766,184 @@ ${p.releaseReadiness?`<div class="card" style="border-left:3px solid ${p.release
 </body></html>`;
 }
 
+
+// ── STEP 2 UI RENDERER: domain badge, gaps, developer improvements, executability ──
+function renderStep2Sections(plan) {
+  renderDomainBadge(plan);
+  renderRequirementGaps(plan);
+  renderDeveloperImprovements(plan);
+  injectExecutabilityTags(plan);
+}
+
+function renderDomainBadge(plan) {
+  const section = document.getElementById("domain-badge-section");
+  if (!section) return;
+  const domain = plan.domain;
+  if (!domain || !domain.name || (domain.name === "General Software" && domain.confidence < 0.31)) {
+    section.style.display = "none";
+    return;
+  }
+  const conf = domain.confidence || 0;
+  const confPct = Math.round(conf * 100);
+  const pillCls = confPct >= 75 ? "" : confPct >= 50 ? "medium" : "low";
+  const signals = (domain.signals || []).slice(0, 8);
+  const signalChips = signals.length
+    ? signals.map(s => `<span class="domain-signal-chip">${escHtml(s)}</span>`).join("")
+    : "";
+  const standards = domain.appliedStandards || [];
+  const stdLine = standards.length
+    ? `<div class="domain-standards-row"><strong>Applied:</strong> ${escHtml(standards.join(" · "))}</div>`
+    : "";
+  section.innerHTML = `
+    <div class="domain-badge-card">
+      <div class="domain-badge-emoji">${escHtml(domain.emoji || "🖥️")}</div>
+      <div class="domain-badge-body">
+        <p class="domain-badge-title">
+          ${escHtml(domain.name)}
+          <span class="domain-confidence-pill ${pillCls}">${confPct}% confidence</span>
+        </p>
+        ${signals.length ? `<div class="domain-signals-row">${signalChips}</div>` : ""}
+        ${stdLine}
+      </div>
+    </div>`;
+  section.style.display = "block";
+}
+
+function renderRequirementGaps(plan) {
+  const section = document.getElementById("req-gaps-section");
+  if (!section) return;
+  const gaps = plan.requirementGaps || [];
+  if (!gaps.length) {
+    section.style.display = "none";
+    return;
+  }
+  const gapRows = gaps.map((gap, idx) => {
+    const rawSev = gap.severity || "MEDIUM";
+    const sev = String(rawSev).toUpperCase();
+    return `
+      <div class="req-gap-item">
+        <span class="req-gap-id">${escHtml(gap.id || `GAP-${String(idx + 1).padStart(3, "0")}`)}</span>
+        <div class="req-gap-body">
+          <p class="req-gap-text">${escHtml(gap.gap || gap.reason || "")}</p>
+          ${gap.question ? `<p class="req-gap-question">${escHtml(gap.question)}</p>` : ""}
+        </div>
+        <span class="severity-badge severity-${sev}">${sev}</span>
+      </div>`;
+  }).join("");
+  section.innerHTML = `
+    <div class="req-gaps-card">
+      <div class="req-gaps-header">
+        <h3 class="req-gaps-title">⚠️ Requirement Gaps</h3>
+        <span class="req-gaps-count">${gaps.length} gap${gaps.length !== 1 ? "s" : ""}</span>
+      </div>
+      ${gapRows}
+    </div>`;
+  section.style.display = "block";
+}
+
+function renderDeveloperImprovements(plan) {
+  const section = document.getElementById("dev-improvements-section");
+  if (!section) return;
+  const items = plan.developerFeedback || [];
+  if (!items.length) {
+    section.style.display = "none";
+    return;
+  }
+  const order = { HIGH: 0, MEDIUM: 1, LOW: 2 };
+  const sorted = [...items].sort((a, b) =>
+    (order[String(a.priority || "MEDIUM").toUpperCase()] ?? 1) -
+    (order[String(b.priority || "MEDIUM").toUpperCase()] ?? 1)
+  );
+  const rows = sorted.map(item => {
+    const pri = String(item.priority || item.severity || "MEDIUM").toUpperCase();
+    return `
+      <div class="dev-improvement-item">
+        <span class="dev-improvement-icon">💡</span>
+        <div class="dev-improvement-body">
+          <p class="dev-improvement-suggestion">${escHtml(item.suggestion || item.title || "")}</p>
+          ${item.reason ? `<p class="dev-improvement-reason">${escHtml(item.reason)}</p>` : ""}
+        </div>
+        <span class="priority-badge priority-${pri}">${pri}</span>
+      </div>`;
+  }).join("");
+  section.innerHTML = `
+    <div class="dev-improvements-card">
+      <div class="dev-improvements-header">
+        <h3 class="dev-improvements-title">💡 Developer Improvements</h3>
+        <span class="dev-improvements-count">${items.length} suggestion${items.length !== 1 ? "s" : ""}</span>
+      </div>
+      ${rows}
+    </div>`;
+  section.style.display = "block";
+}
+
+function injectExecutabilityTags(plan) {
+  const testCases = plan.testCases || [];
+  if (!testCases.length) return;
+  const tcMap = {};
+  testCases.forEach(tc => {
+    if (tc.id) {
+      tcMap[tc.id] = {
+        executability: tc.executability || "Suggested",
+        blockedReason: tc.blockedReason || ""
+      };
+    }
+  });
+  const cards = document.querySelectorAll("[data-tc-id]");
+  cards.forEach(card => {
+    const id = card.getAttribute("data-tc-id");
+    const info = tcMap[id];
+    if (!info) return;
+    card.querySelectorAll(".executability-tag").forEach(el => el.remove());
+    card.querySelectorAll(".blocked-reason-text").forEach(el => el.remove());
+    const heading = card.querySelector("h3, h4, .tc-title, .tc-id, strong");
+    if (heading) heading.insertAdjacentHTML("afterend", buildExecTag(info));
+    else card.insertAdjacentHTML("afterbegin", buildExecTag(info));
+  });
+}
+
+function buildExecTag({ executability, blockedReason }) {
+  const label = executability || "Suggested";
+  const icons = { Executable: "✅", Blocked: "❌", Suggested: "💡" };
+  const icon = icons[label] || "💡";
+  let html = `<span class="executability-tag exec-${label}">${icon} ${label}</span>`;
+  if (label === "Blocked" && blockedReason) {
+    html += `<span class="blocked-reason-text">⚠ ${escHtml(blockedReason)}</span>`;
+  }
+  return html;
+}
+
+function normalizeStep2Plan(data, p) {
+  let domainObj = null;
+  if (p.domain && typeof p.domain === "object") {
+    domainObj = p.domain;
+  } else if (data.domain || p.domain) {
+    domainObj = {
+      name: data.domain || p.domain,
+      confidence: data.domainConfidence || p.domainConfidence || 0.85,
+      emoji: p.domainEmoji || "🧠",
+      signals: data.domainSignals || p.domainSignals || [],
+      appliedStandards: data.appliedStandards || p.appliedStandards || []
+    };
+  }
+  return {
+    domain: domainObj,
+    requirementGaps: p.requirementGaps || [],
+    developerFeedback: p.developerFeedback || [],
+    testCases: p.testCases || p.recommendedTests || []
+  };
+}
+
+function escHtml(str) {
+  return String(str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+
 // ── RENDER ────────────────────────────────────────────────────────────────────
 function sc(s){return s>=75?'var(--good)':s>=50?'var(--med)':'var(--crit)';}
 
@@ -621,6 +967,8 @@ function render(data){
     <div class="cb"><div class="cn" style="color:${sc(p.confidenceScore||0)}">${p.confidenceScore||0}%</div><div class="cl">Confidence</div></div>
   </div>
 
+  <div id="domain-badge-section" style="display:none"></div>
+
   <div class="dl-bar">
     <span class="dl-lbl">Download:</span>
     <button class="dl-btn dl-j" onclick="dlJSON()">⬇ JSON</button>
@@ -643,6 +991,9 @@ function render(data){
 
   ${(p.businessRisks||[]).length?`<div class="sec"><div class="stit">Business risks <span class="scnt">${p.businessRisks.length}</span></div>${p.businessRisks.map(r=>`<div class="rit"><div class="rin">${r.risk}</div><div class="rii">${r.impact}${r.module?` · <span style="color:var(--dim)">${r.module}</span>`:''}</div></div>`).join('')}</div>`:''}
 
+  <div id="req-gaps-section" style="display:none"></div>
+  <div id="dev-improvements-section" style="display:none"></div>
+
   <div class="sec"><div class="stit">Critical scenarios <span class="scnt">${(p.criticalScenarios||[]).length}/8 max</span></div>
   ${(p.criticalScenarios||[]).map((s,i)=>`<div class="scard" id="sc${i}" onclick="tsc(${i})"><div class="shd"><div class="sid2">${s.id||'S-'+String(i+1).padStart(2,'0')}</div><div class="stw"><div class="stt">${s.title}</div>${(s.impactedModules||[]).length?`<div class="smods">${s.impactedModules.join(' · ')}</div>`:''}</div><div class="srisk r${(s.risk||'m')[0].toLowerCase()}">${s.risk||'Medium'}</div><div class="schev">▾</div></div><div class="sbody">${s.whyItMatters?`<div class="slbl">Why this matters</div><div class="swhy">${s.whyItMatters}</div>`:''} ${(s.howToTest||[]).length?`<div class="slbl">How to test</div><ol class="stl">${s.howToTest.map((st,j)=>`<li class="sti"><span class="snum">${j+1}</span><span>${st}</span></li>`).join('')}</ol>`:''} ${s.expectedResult?`<div class="slbl">Expected result</div><div class="sexp">${s.expectedResult}</div>`:''} ${s.developerFeedback?`<div class="slbl">Developer note</div><div class="sdev">${s.developerFeedback}</div>`:''}</div></div>`).join('')||'<div style="color:var(--dim);font-size:12px;padding:8px 0">No scenarios generated</div>'}</div>
 
@@ -652,6 +1003,8 @@ function render(data){
 
   ${p.confidenceReason?`<div class="sec"><div class="stit">Confidence reasoning</div><div class="gc"><div class="sbox" style="font-size:12px;color:var(--dim)">${p.confidenceReason}</div></div></div>`:''}
   `;
+
+  renderStep2Sections(normalizeStep2Plan(data, p));
 }
 
 function tsc(i){document.getElementById('sc'+i).classList.toggle('open');}
